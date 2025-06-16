@@ -2,14 +2,42 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chiosco D'Ufficio (Consultant 2)</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 20px;
-      background: #f3e9dc; /* marroncino chiaro tenue */
+      background: #f3eee9;
       color: #333;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header img {
+      height: 40px;
+    }
+    .paypal-box {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      border: 1px solid #ccc;
+      background: white;
+      padding: 10px;
+      text-align: center;
+      max-width: 200px;
+    }
+    .paypal-box img {
+      width: 100px;
+      height: 100px;
+    }
+    .paypal-box a {
+      display: block;
+      margin-top: 5px;
+      color: #0070ba;
+      text-decoration: none;
     }
     table {
       width: 100%;
@@ -21,331 +49,185 @@
       padding: 10px;
       border: 1px solid #ddd;
       text-align: center;
-      vertical-align: middle;
     }
-    th.credito-consumato {
-      color: #c0392b; /* rosso */
+    th i {
+      margin-left: 5px;
     }
-    th.aggiungi-credito {
-      color: #27ae60; /* verde */
+    .negative {
+      color: red;
     }
-    th.aggiungi-credito-massivo {
-      color: #27ae60; /* verde */
+    .bonus-section {
+      background: white;
+      padding: 15px;
+      border: 1px solid #ddd;
+      margin-top: 20px;
     }
     button {
       padding: 5px 10px;
       margin: 2px;
       cursor: pointer;
-      font-size: 0.9em;
     }
-    input[type="number"], input[type="text"] {
-      width: 100px;
+    .green {
+      color: green;
     }
-    .nome-utente-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .red {
+      color: red;
     }
-    .nome-utente {
-      color: #2c3e50;
+    .gold {
+      color: goldenrod;
       font-weight: bold;
-    }
-    .btn-storico {
-      margin-top: 5px;
-      font-size: 0.8em;
-      padding: 3px 6px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .btn-storico:hover {
-      background-color: #2980b9;
-    }
-    .saldo-negativo {
-      color: #c0392b;
-      font-weight: bold;
-    }
-    .bonus {
-      font-weight: bold;
-      color: #b8860b; /* oro */
-    }
-    /* MODALE */
-    .modal {
-      display: none; 
-      position: fixed;
-      z-index: 9999;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-    }
-    .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 400px;
-      box-shadow: 0 0 10px #555;
-      position: relative;
-    }
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 24px;
-      font-weight: bold;
-      position: absolute;
-      right: 10px; top: 5px;
-      cursor: pointer;
-    }
-    .close:hover {
-      color: black;
     }
   </style>
 </head>
 <body>
-  <h1>Chiosco D'Ufficio (Consultant 2) ☕</h1>
+  <div class="header">
+    <h1>Chiosco D'Ufficio (Consultant 2) ☕</h1>
+    <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="Snack" />
+  </div>
 
-  <h3>Aggiungi/Rimuovi Utente</h3>
-  <input type="text" id="nomeUtente" placeholder="Nome" />
-  <button onclick="aggiungiUtente()">➕ Aggiungi</button>
-  <button onclick="rimuoviUtente()">➖ Rimuovi</button>
+  <div class="paypal-box">
+    <h4>Contributi via PayPal</h4>
+    <img src="https://quickchart.io/qr?text=https://paypal.me/TommasoMassai" alt="QR PayPal" />
+    <a href="https://paypal.me/TommasoMassai" target="_blank">paypal.me/TommasoMassai</a>
+    <small>Scansiona o clicca per contribuire ☕</small>
+  </div>
 
-  <table id="coffeeTable">
+  <table id="creditTable">
     <thead>
       <tr>
-        <th>👤 Nome</th>
-        <th>Saldo (€) 🪙</th>
-        <th class="credito-consumato">Credito consumato <span style="color:#c0392b;">&#x2193;</span></th>
-        <th class="aggiungi-credito">Aggiungi credito <span style="color:#27ae60;">&#x2191;</span></th>
-        <th class="aggiungi-credito-massivo">Aggiungi credito massivo 💵💳</th>
-        <th>Golden Bonus ☕⭐<br /><small>2 free credits per ogni 10 € pagati</small></th>
+        <th>Nome <i>👤</i></th>
+        <th>Saldo (€) <i>🪙</i></th>
+        <th class="red">Credito Consumato <i>🔻</i></th>
+        <th class="green">Aggiungi Credito <i>🔺</i></th>
+        <th class="green">Credito Massivo <i>💵💳</i></th>
+        <th>Golden Bonus <i>☕⭐</i><br><small class="gold">2 free credit for each 10 € payment</small></th>
+        <th>Storico</th>
+        <th>Rimuovi</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Righe generate dinamicamente -->
-    </tbody>
+    <tbody id="userRows"></tbody>
   </table>
 
-  <!-- MODALE STORICO -->
-  <div id="modalStorico" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="chiudiModal()">&times;</span>
-      <h2>Storico Credito</h2>
-      <div id="contenutoStorico">
-        <!-- qui metto lo storico -->
-      </div>
-    </div>
+  <div>
+    <input type="text" id="newName" placeholder="Nuovo nome" />
+    <button onclick="addUser()">Aggiungi Utente</button>
   </div>
 
   <script>
-    const COSTO_CAFFE = 0.40;
+    const creditPerClick = 0.4;
+    let users = JSON.parse(localStorage.getItem("users") || "[]");
 
-    let persone = [];
+    function save() {
+      localStorage.setItem("users", JSON.stringify(users));
+    }
 
-    // Per ogni persona mantengo uno storico movimenti: array di {tipo: 'debito'|'credito', valore: number, data: ISOString}
-    // Lo salvo insieme a nome, saldo e goldenBonus
-
-    function aggiornaTabella() {
-      const tbody = document.querySelector("#coffeeTable tbody");
+    function render() {
+      const tbody = document.getElementById("userRows");
       tbody.innerHTML = "";
+      users.forEach((user, index) => {
+        const tr = document.createElement("tr");
 
-      persone.forEach((persona, i) => {
-        const row = document.createElement("tr");
+        const tdName = document.createElement("td");
+        tdName.textContent = user.name;
+        tr.appendChild(tdName);
 
-        // Nome + bottone storico sotto
-        const cellNome = document.createElement("td");
-        const divNome = document.createElement("div");
-        divNome.classList.add("nome-utente-container");
+        const tdBalance = document.createElement("td");
+        tdBalance.textContent = user.balance.toFixed(2);
+        if (user.balance < 0) tdBalance.classList.add("negative");
+        tr.appendChild(tdBalance);
 
-        const spanNome = document.createElement("span");
-        spanNome.classList.add("nome-utente");
-        spanNome.textContent = persona.nome;
-
-        const btnStorico = document.createElement("button");
-        btnStorico.classList.add("btn-storico");
-        btnStorico.textContent = "Storico Transazioni";
-        btnStorico.onclick = () => mostraStorico(i);
-
-        divNome.appendChild(spanNome);
-        divNome.appendChild(btnStorico);
-        cellNome.appendChild(divNome);
-
-        // Saldo con colore se negativo
-        const cellSaldo = document.createElement("td");
-        cellSaldo.textContent = persona.saldo.toFixed(2);
-        if (persona.saldo < 0) {
-          cellSaldo.classList.add("saldo-negativo");
-        }
-
-        // Bottone - credito consumato (debito)
-        const btnDebito = document.createElement("button");
-        btnDebito.textContent = "➖";
-        btnDebito.onclick = () => {
-          persona.saldo -= COSTO_CAFFE;
-          aggiungiMovimento(persona, "debito", COSTO_CAFFE);
-          aggiornaTabella();
-          salvaDati();
+        const tdMinus = document.createElement("td");
+        const btnMinus = document.createElement("button");
+        btnMinus.textContent = "-";
+        btnMinus.onclick = () => {
+          user.balance -= creditPerClick;
+          user.history.push(`-${creditPerClick.toFixed(2)} €`);
+          save();
+          render();
         };
+        tdMinus.appendChild(btnMinus);
+        tr.appendChild(tdMinus);
 
-        // Bottone + aggiungi credito singolo (con incremento COSTO_CAFFE)
-        const btnCredito = document.createElement("button");
-        btnCredito.textContent = "➕";
-        btnCredito.onclick = () => {
-          persona.saldo += COSTO_CAFFE;
-          aggiungiMovimento(persona, "credito", COSTO_CAFFE);
-          aggiornaTabella();
-          salvaDati();
+        const tdPlus = document.createElement("td");
+        const btnPlus = document.createElement("button");
+        btnPlus.textContent = "+";
+        btnPlus.onclick = () => {
+          user.balance += creditPerClick;
+          user.history.push(`+${creditPerClick.toFixed(2)} €`);
+          save();
+          render();
         };
+        tdPlus.appendChild(btnPlus);
+        tr.appendChild(tdPlus);
 
-        // Input + bottone aggiungi credito massivo
-        const inputCredito = document.createElement("input");
-        inputCredito.type = "number";
-        inputCredito.min = "0";
-        inputCredito.step = "0.01";
-        inputCredito.placeholder = "€";
-
-        const btnAggiungiCredito = document.createElement("button");
-        btnAggiungiCredito.textContent = "Aggiungi";
-        btnAggiungiCredito.onclick = () => {
-          const valore = parseFloat(inputCredito.value);
-          if (!isNaN(valore) && valore > 0) {
-            persona.saldo += valore;
-            aggiungiMovimento(persona, "credito", valore);
-
-            // Golden Bonus: 2 crediti ogni 10 €
-            const nuoviBonus = Math.floor(valore / 10) * 2;
-            persona.goldenBonus = (persona.goldenBonus || 0) + nuoviBonus;
-
-            aggiornaTabella();
-            salvaDati();
-            inputCredito.value = "";
+        const tdMassive = document.createElement("td");
+        const inputMassive = document.createElement("input");
+        inputMassive.type = "number";
+        inputMassive.min = 0;
+        const btnMassive = document.createElement("button");
+        btnMassive.textContent = "OK";
+        btnMassive.onclick = () => {
+          const value = parseFloat(inputMassive.value);
+          if (!isNaN(value) && value > 0) {
+            user.balance += value;
+            const bonus = Math.floor(value / 10) * 2;
+            user.bonus = (user.bonus || 0) + bonus;
+            user.history.push(`+${value.toFixed(2)} € (massive) + ${bonus} bonus`);
+            save();
+            render();
           }
         };
+        tdMassive.appendChild(inputMassive);
+        tdMassive.appendChild(btnMassive);
+        tr.appendChild(tdMassive);
 
-        const cellCreditoMassivo = document.createElement("td");
-        cellCreditoMassivo.appendChild(inputCredito);
-        cellCreditoMassivo.appendChild(btnAggiungiCredito);
+        const tdBonus = document.createElement("td");
+        tdBonus.innerHTML = `<span class="gold">${user.bonus || 0}</span> <button onclick="useBonus(${index})">-1</button>`;
+        tr.appendChild(tdBonus);
 
-        // Bottone rimuovi bonus
-        const btnRimuoviBonus = document.createElement("button");
-        btnRimuoviBonus.textContent = "➖ Bonus";
-        btnRimuoviBonus.onclick = () => {
-          if (persona.goldenBonus > 0) {
-            persona.goldenBonus--;
-            aggiornaTabella();
-            salvaDati();
-          }
+        const tdHistory = document.createElement("td");
+        const btnHistory = document.createElement("button");
+        btnHistory.textContent = "Storico Transazioni";
+        btnHistory.onclick = () => {
+          alert(user.history.join("\n") || "Nessuna transazione.");
         };
+        tdHistory.appendChild(btnHistory);
+        tr.appendChild(tdHistory);
 
-        const cellGoldenBonus = document.createElement("td");
-        const spanBonus = document.createElement("span");
-        spanBonus.classList.add("bonus");
-        spanBonus.textContent = (persona.goldenBonus || 0);
-        cellGoldenBonus.appendChild(spanBonus);
-        cellGoldenBonus.appendChild(document.createTextNode(" "));
-        cellGoldenBonus.appendChild(btnRimuoviBonus);
+        const tdRemove = document.createElement("td");
+        const btnRemove = document.createElement("button");
+        btnRemove.textContent = "🗑️";
+        btnRemove.onclick = () => {
+          users.splice(index, 1);
+          save();
+          render();
+        };
+        tdRemove.appendChild(btnRemove);
+        tr.appendChild(tdRemove);
 
-        row.appendChild(cellNome);
-        row.appendChild(cellSaldo);
-        row.appendChild(creaCellaConElemento(btnDebito));
-        row.appendChild(creaCellaConElemento(btnCredito));
-        row.appendChild(cellCreditoMassivo);
-        row.appendChild(cellGoldenBonus);
-
-        tbody.appendChild(row);
+        tbody.appendChild(tr);
       });
     }
 
-    function creaCellaConElemento(el) {
-      const td = document.createElement("td");
-      td.appendChild(el);
-      return td;
+    function addUser() {
+      const name = document.getElementById("newName").value.trim();
+      if (!name) return;
+      users.push({ name, balance: 0, bonus: 0, history: [] });
+      save();
+      render();
+      document.getElementById("newName").value = "";
     }
 
-    function aggiungiUtente() {
-      const nome = document.getElementById("nomeUtente").value.trim();
-      if (nome && !persone.some(p => p.nome.toLowerCase() === nome.toLowerCase())) {
-        persone.push({
-          nome: nome,
-          saldo: 0,
-          goldenBonus: 0,
-          storico: [],
-        });
-        aggiornaTabella();
-        salvaDati();
-        document.getElementById("nomeUtente").value = "";
+    function useBonus(index) {
+      if (users[index].bonus > 0) {
+        users[index].bonus--;
+        users[index].history.push("Usato 1 Golden Bonus");
+        save();
+        render();
       }
     }
 
-    function rimuoviUtente() {
-      const nome = document.getElementById("nomeUtente").value.trim();
-      persone = persone.filter(p => p.nome.toLowerCase() !== nome.toLowerCase());
-      aggiornaTabella();
-      salvaDati();
-      document.getElementById("nomeUtente").value = "";
-    }
-
-    function salvaDati() {
-      localStorage.setItem("personeCaffe", JSON.stringify(persone));
-    }
-
-    function caricaDati() {
-      const dati = localStorage.getItem("personeCaffe");
-      if (dati) {
-        persone = JSON.parse(dati);
-      }
-    }
-
-    // Funzione per aggiungere il movimento allo storico
-    function aggiungiMovimento(persona, tipo, valore) {
-      if (!persona.storico) persona.storico = [];
-      persona.storico.push({
-        tipo: tipo,
-        valore: valore,
-        data: new Date().toISOString()
-      });
-    }
-
-    // Funzione per mostrare il popup storico cliccando sul pulsante "Storico Transazioni"
-    function mostraStorico(index) {
-      const persona = persone[index];
-      const container = document.getElementById("contenutoStorico");
-      container.innerHTML = "";
-
-      if (!persona.storico || persona.storico.length === 0) {
-        container.textContent = "Nessun movimento registrato.";
-      } else {
-        const ul = document.createElement("ul");
-        persona.storico.slice().reverse().forEach((mov) => {
-          const li = document.createElement("li");
-          const data = new Date(mov.data);
-          const dataStr = data.toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
-          li.textContent = `${dataStr}: ${mov.tipo === "credito" ? "Aggiunto credito +€" : "Consumato credito -€"}${mov.valore.toFixed(2)}`;
-          li.style.color = mov.tipo === "credito" ? "#27ae60" : "#c0392b";
-          ul.appendChild(li);
-        });
-        container.appendChild(ul);
-      }
-      document.getElementById("modalStorico").style.display = "block";
-    }
-
-    function chiudiModal() {
-      document.getElementById("modalStorico").style.display = "none";
-    }
-
-    // Chiudo il modal cliccando fuori dal contenuto
-    window.onclick = function(event) {
-      const modal = document.getElementById("modalStorico");
-      if (event.target === modal) {
-        chiudiModal();
-      }
-    }
-
-    caricaDati();
-    aggiornaTabella();
+    render();
   </script>
 </body>
 </html>
