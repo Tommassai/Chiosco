@@ -84,40 +84,6 @@
     .action-red {
       color: red;
     }
-
-    /* Popup modal styles */
-    .modal {
-      display: none; 
-      position: fixed; 
-      z-index: 999; 
-      left: 0;
-      top: 0;
-      width: 100%; 
-      height: 100%; 
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4); 
-    }
-    .modal-content {
-      background-color: #fefefe;
-      margin: 10% auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 300px;
-      max-height: 70vh;
-      overflow-y: auto;
-      border-radius: 6px;
-    }
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .close:hover,
-    .close:focus {
-      color: black;
-    }
   </style>
 </head>
 <body>
@@ -129,7 +95,7 @@
     <div class="paypal-box">
       <h4>Contributi via PayPal</h4>
       <img src="https://quickchart.io/qr?text=https://paypal.me/TommasoMassai" alt="QR PayPal" />
-      <a href="https://paypal.me/TommasoMassai" target="_blank">paypal.me/TommasoMassai</a>
+      <a href="https://paypal.me/TommasoMassai" target="_blank" rel="noopener noreferrer">paypal.me/TommasoMassai</a>
       <small>Scansiona o clicca per contribuire ☕</small>
     </div>
   </div>
@@ -155,31 +121,44 @@
     <button onclick="addUser()">Aggiungi Utente</button>
   </div>
 
-  <!-- Modal for transaction history -->
-  <div id="historyModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeHistory()">&times;</span>
+  <!-- Modal Storico Transazioni -->
+  <div id="historyModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000;">
+    <div style="background:#fff; max-width:500px; margin:100px auto; padding:20px; border-radius:8px; position:relative;">
+      <button style="position:absolute; top:10px; right:10px; cursor:pointer;" onclick="closeModal()">X</button>
       <h3>Storico Transazioni</h3>
-      <pre id="historyContent" style="white-space: pre-wrap;"></pre>
+      <div id="historyContent" style="max-height:300px; overflow-y:auto;"></div>
     </div>
   </div>
 
   <script>
     let users = [];
 
+    // Carica dati da localStorage all'avvio
+    function loadData() {
+      const data = localStorage.getItem('coffeeUsers');
+      if (data) {
+        users = JSON.parse(data);
+      }
+    }
+
+    // Salva dati su localStorage ogni volta che cambia
+    function saveData() {
+      localStorage.setItem('coffeeUsers', JSON.stringify(users));
+    }
+
     function addUser() {
-      const name = document.getElementById("newName").value.trim();
+      const name = document.getElementById('newName').value.trim();
       if (!name) return;
       users.push({ name, balance: 0, bonus: 0, history: [] });
-      document.getElementById("newName").value = "";
+      document.getElementById('newName').value = '';
+      saveData();
       render();
     }
 
     function updateBalance(index, amount, label) {
       users[index].balance += amount;
-      users[index].history.push(
-        `${new Date().toLocaleString()}: ${label} ${amount.toFixed(2)}€`
-      );
+      users[index].history.push(`${new Date().toLocaleString()}: ${label} ${amount.toFixed(2)}€`);
+      saveData();
       render();
     }
 
@@ -189,134 +168,129 @@
       users[index].balance += value;
       const bonuses = Math.floor(value / 10) * 2;
       users[index].bonus += bonuses;
-      users[index].history.push(
-        `${new Date().toLocaleString()}: Ricarica massiva di ${value.toFixed(
-          2
-        )}€ + ${bonuses} Golden Bonus`
-      );
+      users[index].history.push(`${new Date().toLocaleString()}: Ricarica massiva di ${value.toFixed(2)}€ + ${bonuses} Golden Bonus`);
+      saveData();
       render();
     }
 
     function useBonus(index) {
       if (users[index].bonus > 0) {
         users[index].bonus--;
-        users[index].history.push(
-          `${new Date().toLocaleString()}: Utilizzato 1 Golden Bonus`
-        );
+        users[index].history.push(`${new Date().toLocaleString()}: Utilizzato 1 Golden Bonus`);
+        saveData();
+        render();
+      }
+    }
+
+    function removeUser(index) {
+      if (confirm(`Rimuovere l'utente "${users[index].name}"?`)) {
+        users.splice(index, 1);
+        saveData();
         render();
       }
     }
 
     function showHistory(index) {
-      const modal = document.getElementById("historyModal");
-      const content = document.getElementById("historyContent");
-      content.textContent = users[index].history.join("\n") || "Nessuna transazione registrata.";
-      modal.style.display = "block";
-      currentHistoryIndex = index;
-    }
-
-    function closeHistory() {
-      document.getElementById("historyModal").style.display = "none";
-    }
-
-    function removeUser(index) {
-      if (
-        confirm(
-          `Sei sicuro di voler rimuovere l'utente "${users[index].name}"? Questa azione è irreversibile.`
-        )
-      ) {
-        users.splice(index, 1);
-        render();
+      const modal = document.getElementById('historyModal');
+      const modalContent = document.getElementById('historyContent');
+      modalContent.innerHTML = '';
+      if (users[index].history.length === 0) {
+        modalContent.textContent = 'Nessuna transazione registrata.';
+      } else {
+        const ul = document.createElement('ul');
+        users[index].history.forEach(e => {
+          const li = document.createElement('li');
+          li.textContent = e;
+          ul.appendChild(li);
+        });
+        modalContent.appendChild(ul);
       }
+      modal.style.display = 'block';
+    }
+
+    // Chiudi modal quando clicchi fuori o sul bottone
+    window.onclick = function(event) {
+      const modal = document.getElementById('historyModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    };
+    function closeModal() {
+      document.getElementById('historyModal').style.display = 'none';
     }
 
     function render() {
       const tbody = document.getElementById("userBody");
-      tbody.innerHTML = "";
+      tbody.innerHTML = '';
       users.forEach((user, i) => {
         const tr = document.createElement("tr");
-
-        // Nome colonna
         const nameTd = document.createElement("td");
         nameTd.textContent = user.name;
 
-        // Saldo colonna
         const balanceTd = document.createElement("td");
         balanceTd.textContent = user.balance.toFixed(2);
         if (user.balance < 0) balanceTd.classList.add("negative");
 
-        // Credito Consumato colonna (pulsante -0,40€)
         const consumeTd = document.createElement("td");
-        const consumeBtn = document.createElement("button");
-        consumeBtn.textContent = "- 0,40 €";
-        consumeBtn.classList.add("action-red");
-        consumeBtn.onclick = () => updateBalance(i, -0.4, "Debito");
-        consumeTd.appendChild(consumeBtn);
-
-        // Aggiungi Credito colonna (pulsante +0,40€)
         const addTd = document.createElement("td");
-        const addBtn = document.createElement("button");
-        addBtn.textContent = "+ 0,40 €";
-        addBtn.classList.add("action-green");
-        addBtn.onclick = () => updateBalance(i, 0.4, "Credito");
-        addTd.appendChild(addBtn);
-
-        // Aggiungi Credito Massivo colonna (pulsante +X€ + bonus)
-        const addMassiveTd = document.createElement("td");
-        const addMassiveBtn = document.createElement("button");
-        addMassiveBtn.textContent = "+ Credito Massivo";
-        addMassiveBtn.classList.add("action-green");
-        addMassiveBtn.onclick = () => addMassiveCredit(i);
-        addMassiveTd.appendChild(addMassiveBtn);
-
-        // Golden Bonus colonna (pulsante per usare un bonus)
+        const massTd = document.createElement("td");
         const bonusTd = document.createElement("td");
-        if (user.bonus > 0) {
-          const bonusBtn = document.createElement("button");
-          bonusBtn.textContent = `Usa Bonus (${user.bonus})`;
-          bonusBtn.classList.add("golden");
-          bonusBtn.onclick = () => useBonus(i);
-          bonusTd.appendChild(bonusBtn);
-        } else {
-          bonusTd.textContent = "0";
-        }
-
-        // Storico colonna (pulsante)
-        const historyTd = document.createElement("td");
-        const historyBtn = document.createElement("button");
-        historyBtn.textContent = "Mostra Storico";
-        historyBtn.onclick = () => showHistory(i);
-        historyTd.appendChild(historyBtn);
-
-        // Rimuovi utente colonna (pulsante)
+        const histTd = document.createElement("td");
         const removeTd = document.createElement("td");
+
+        const consumeBtn = document.createElement("button");
+        consumeBtn.textContent = "-";
+        consumeBtn.onclick = () => updateBalance(i, -0.4, "Debito");
+
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+";
+        addBtn.onclick = () => updateBalance(i, 0.4, "Credito");
+
+        const massBtn = document.createElement("button");
+        massBtn.textContent = "€";
+        massBtn.onclick = () => addMassiveCredit(i);
+
+        const bonusSpan = document.createElement("span");
+        bonusSpan.textContent = user.bonus;
+        bonusSpan.classList.add("golden");
+
+        const useBonusBtn = document.createElement("button");
+        useBonusBtn.textContent = "Usa Bonus";
+        useBonusBtn.onclick = () => useBonus(i);
+
+        const histBtn = document.createElement("button");
+        histBtn.textContent = "Storico Transazioni";
+        histBtn.onclick = () => showHistory(i);
+
         const removeBtn = document.createElement("button");
-        removeBtn.textContent = "Rimuovi";
-        removeBtn.style.backgroundColor = "#e55";
-        removeBtn.style.color = "white";
+        removeBtn.textContent = "Rimuovi Utente";
         removeBtn.onclick = () => removeUser(i);
+
+        consumeTd.appendChild(consumeBtn);
+        addTd.appendChild(addBtn);
+        massTd.appendChild(massBtn);
+        bonusTd.appendChild(bonusSpan);
+        bonusTd.appendChild(useBonusBtn);
+        histTd.appendChild(histBtn);
         removeTd.appendChild(removeBtn);
 
-        // Append all td
         tr.appendChild(nameTd);
         tr.appendChild(balanceTd);
         tr.appendChild(consumeTd);
         tr.appendChild(addTd);
-        tr.appendChild(addMassiveTd);
+        tr.appendChild(massTd);
         tr.appendChild(bonusTd);
-        tr.appendChild(historyTd);
+        tr.appendChild(histTd);
         tr.appendChild(removeTd);
 
         tbody.appendChild(tr);
       });
     }
 
-    // Close modal if user clicks outside content
-    window.onclick = function(event) {
-      const modal = document.getElementById("historyModal");
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
+    // Al caricamento pagina carica i dati e mostra
+    window.onload = () => {
+      loadData();
+      render();
     };
   </script>
 </body>
