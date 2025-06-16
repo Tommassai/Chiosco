@@ -21,6 +21,7 @@
       padding: 10px;
       border: 1px solid #ddd;
       text-align: center;
+      vertical-align: middle;
     }
     th.credito-consumato {
       color: #c0392b; /* rosso */
@@ -35,14 +36,41 @@
       padding: 5px 10px;
       margin: 2px;
       cursor: pointer;
+      font-size: 0.9em;
     }
     input[type="number"], input[type="text"] {
       width: 100px;
     }
+    .nome-utente-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     .nome-utente {
-      cursor: pointer;
       color: #2c3e50;
-      text-decoration: underline;
+      font-weight: bold;
+    }
+    .btn-storico {
+      margin-top: 5px;
+      font-size: 0.8em;
+      padding: 3px 6px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-storico:hover {
+      background-color: #2980b9;
+    }
+    .saldo-negativo {
+      color: #c0392b;
+      font-weight: bold;
+    }
+    .bonus {
+      font-weight: bold;
+      color: #b8860b; /* oro */
     }
     /* MODALE */
     .modal {
@@ -127,11 +155,30 @@
       persone.forEach((persona, i) => {
         const row = document.createElement("tr");
 
+        // Nome + bottone storico sotto
         const cellNome = document.createElement("td");
-        cellNome.innerHTML = `<span class="nome-utente" onclick="mostraStorico(${i})">${persona.nome}</span>`;
+        const divNome = document.createElement("div");
+        divNome.classList.add("nome-utente-container");
 
+        const spanNome = document.createElement("span");
+        spanNome.classList.add("nome-utente");
+        spanNome.textContent = persona.nome;
+
+        const btnStorico = document.createElement("button");
+        btnStorico.classList.add("btn-storico");
+        btnStorico.textContent = "Storico Transazioni";
+        btnStorico.onclick = () => mostraStorico(i);
+
+        divNome.appendChild(spanNome);
+        divNome.appendChild(btnStorico);
+        cellNome.appendChild(divNome);
+
+        // Saldo con colore se negativo
         const cellSaldo = document.createElement("td");
         cellSaldo.textContent = persona.saldo.toFixed(2);
+        if (persona.saldo < 0) {
+          cellSaldo.classList.add("saldo-negativo");
+        }
 
         // Bottone - credito consumato (debito)
         const btnDebito = document.createElement("button");
@@ -194,7 +241,11 @@
         };
 
         const cellGoldenBonus = document.createElement("td");
-        cellGoldenBonus.textContent = (persona.goldenBonus || 0) + " ";
+        const spanBonus = document.createElement("span");
+        spanBonus.classList.add("bonus");
+        spanBonus.textContent = (persona.goldenBonus || 0);
+        cellGoldenBonus.appendChild(spanBonus);
+        cellGoldenBonus.appendChild(document.createTextNode(" "));
         cellGoldenBonus.appendChild(btnRimuoviBonus);
 
         row.appendChild(cellNome);
@@ -258,7 +309,7 @@
       });
     }
 
-    // Funzione per mostrare il popup storico cliccando sul nome utente
+    // Funzione per mostrare il popup storico cliccando sul pulsante "Storico Transazioni"
     function mostraStorico(index) {
       const persona = persone[index];
       const container = document.getElementById("contenutoStorico");
@@ -278,8 +329,6 @@
         });
         container.appendChild(ul);
       }
-
-      // Apri modale
       document.getElementById("modalStorico").style.display = "block";
     }
 
@@ -287,11 +336,11 @@
       document.getElementById("modalStorico").style.display = "none";
     }
 
-    // Chiudi modal se clicchi fuori
+    // Chiudo il modal cliccando fuori dal contenuto
     window.onclick = function(event) {
       const modal = document.getElementById("modalStorico");
-      if (event.target == modal) {
-        modal.style.display = "none";
+      if (event.target === modal) {
+        chiudiModal();
       }
     }
 
