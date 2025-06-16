@@ -26,6 +26,18 @@
       padding: 5px 10px;
       margin: 2px;
       cursor: pointer;
+      border-radius: 4px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    button.action-green {
+      background-color: #28a745;
+      color: white;
+    }
+    button.action-red {
+      background-color: #dc3545;
+      color: white;
     }
     input[type="number"], input[type="text"] {
       width: 100px;
@@ -77,12 +89,6 @@
     }
     .icon {
       margin-right: 4px;
-    }
-    .action-green {
-      color: green;
-    }
-    .action-red {
-      color: red;
     }
 
     /* Modal styles */
@@ -161,6 +167,7 @@
         <th class="action-green"><span class="icon">💵</span>Aggiungi Credito Massivo</th>
         <th><span class="icon">⭐</span>Golden Bonus<br /><small>2 free credit for each 10 € payment</small></th>
         <th>Storico</th>
+        <th>Rimuovi</th>
       </tr>
     </thead>
     <tbody id="userBody"></tbody>
@@ -168,7 +175,7 @@
 
   <div>
     <input type="text" id="newName" placeholder="Nuovo nome" />
-    <button onclick="addUser()">Aggiungi Utente</button>
+    <button class="action-green" onclick="addUser()">Aggiungi Utente</button>
   </div>
 
   <!-- Modal -->
@@ -239,6 +246,13 @@
       }
     }
 
+    function removeUser(index) {
+      if (confirm(`Sei sicuro di voler rimuovere l'utente "${users[index].name}"?`)) {
+        users.splice(index, 1);
+        render();
+      }
+    }
+
     function render() {
       const tbody = document.getElementById("userBody");
       tbody.innerHTML = '';
@@ -277,6 +291,7 @@
           const useBonusBtn = document.createElement("button");
           useBonusBtn.textContent = "Usa";
           useBonusBtn.style.marginLeft = "6px";
+          useBonusBtn.classList.add("action-green");
           useBonusBtn.onclick = () => useBonus(i);
           bonusTd.appendChild(useBonusBtn);
         }
@@ -287,6 +302,13 @@
         historyBtn.onclick = () => showHistory(i);
         historyTd.appendChild(historyBtn);
 
+        const removeTd = document.createElement("td");
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "Rimuovi";
+        removeBtn.classList.add("action-red");
+        removeBtn.onclick = () => removeUser(i);
+        removeTd.appendChild(removeBtn);
+
         tr.appendChild(nameTd);
         tr.appendChild(balanceTd);
         tr.appendChild(creditUsedTd);
@@ -294,6 +316,7 @@
         tr.appendChild(addMassiveTd);
         tr.appendChild(bonusTd);
         tr.appendChild(historyTd);
+        tr.appendChild(removeTd);
 
         tbody.appendChild(tr);
       });
