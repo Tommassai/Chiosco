@@ -8,7 +8,7 @@
     body {
       font-family: sans-serif;
       padding: 20px;
-      background: #f9f9f9; /* Sfondo neutro chiaro */
+      background: #f9f9f9;
       color: #333;
     }
     table {
@@ -44,6 +44,14 @@
       border: 1px solid #ddd;
       margin-top: 20px;
     }
+    .totale-saldo {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #e6f7ff;
+      border: 1px solid #b3e0ff;
+    }
   </style>
 </head>
 <body>
@@ -74,6 +82,10 @@
     </tbody>
   </table>
 
+  <div class="totale-saldo" id="totaleSaldo">
+    Totale saldo cumulativo: €0.00
+  </div>
+
   <script>
     const COSTO_CAFFE = 0.40;
 
@@ -82,7 +94,10 @@
     function aggiornaTabella() {
       const tbody = document.querySelector("#coffeeTable tbody");
       tbody.innerHTML = "";
+      let totale = 0;
+
       persone.forEach((persona, index) => {
+        totale += persona.saldo;
         const row = document.createElement("tr");
 
         const cellNome = document.createElement("td");
@@ -157,6 +172,8 @@
 
         tbody.appendChild(row);
       });
+
+      document.getElementById("totaleSaldo").textContent = `Totale saldo cumulativo: €${totale.toFixed(2)}`;
     }
 
     function creaCellaConElemento(el) {
