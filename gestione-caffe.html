@@ -39,22 +39,46 @@
     input[type="number"], input[type="text"] {
       width: 100px;
     }
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
+    .nome-utente {
+      cursor: pointer;
+      color: #2c3e50;
+      text-decoration: underline;
     }
-    .header img {
-      height: 40px;
+    /* MODALE */
+    .modal {
+      display: none; 
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      box-shadow: 0 0 10px #555;
+      position: relative;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      position: absolute;
+      right: 10px; top: 5px;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Chiosco D'Ufficio (Consultant 2) ☕</h1>
-    <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="Snack" />
-  </div>
+  <h1>Chiosco D'Ufficio (Consultant 2) ☕</h1>
 
   <h3>Aggiungi/Rimuovi Utente</h3>
   <input type="text" id="nomeUtente" placeholder="Nome" />
@@ -69,7 +93,7 @@
         <th class="credito-consumato">Credito consumato <span style="color:#c0392b;">&#x2193;</span></th>
         <th class="aggiungi-credito">Aggiungi credito <span style="color:#27ae60;">&#x2191;</span></th>
         <th class="aggiungi-credito-massivo">Aggiungi credito massivo 💵💳</th>
-        <th>Golden Bonus ☕⭐<br /><small>2 free credits for each 10 € payment</small></th>
+        <th>Golden Bonus ☕⭐<br /><small>2 free credits per ogni 10 € pagati</small></th>
       </tr>
     </thead>
     <tbody>
@@ -77,44 +101,64 @@
     </tbody>
   </table>
 
+  <!-- MODALE STORICO -->
+  <div id="modalStorico" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="chiudiModal()">&times;</span>
+      <h2>Storico Credito</h2>
+      <div id="contenutoStorico">
+        <!-- qui metto lo storico -->
+      </div>
+    </div>
+  </div>
+
   <script>
     const COSTO_CAFFE = 0.40;
 
     let persone = [];
 
+    // Per ogni persona mantengo uno storico movimenti: array di {tipo: 'debito'|'credito', valore: number, data: ISOString}
+    // Lo salvo insieme a nome, saldo e goldenBonus
+
     function aggiornaTabella() {
       const tbody = document.querySelector("#coffeeTable tbody");
       tbody.innerHTML = "";
 
-      persone.forEach((persona) => {
+      persone.forEach((persona, i) => {
         const row = document.createElement("tr");
 
         const cellNome = document.createElement("td");
-        cellNome.textContent = persona.nome;
+        cellNome.innerHTML = `<span class="nome-utente" onclick="mostraStorico(${i})">${persona.nome}</span>`;
 
         const cellSaldo = document.createElement("td");
         cellSaldo.textContent = persona.saldo.toFixed(2);
 
+        // Bottone - credito consumato (debito)
         const btnDebito = document.createElement("button");
         btnDebito.textContent = "➖";
         btnDebito.onclick = () => {
           persona.saldo -= COSTO_CAFFE;
+          aggiungiMovimento(persona, "debito", COSTO_CAFFE);
           aggiornaTabella();
           salvaDati();
         };
 
+        // Bottone + aggiungi credito singolo (con incremento COSTO_CAFFE)
         const btnCredito = document.createElement("button");
         btnCredito.textContent = "➕";
         btnCredito.onclick = () => {
           persona.saldo += COSTO_CAFFE;
+          aggiungiMovimento(persona, "credito", COSTO_CAFFE);
           aggiornaTabella();
           salvaDati();
         };
 
+        // Input + bottone aggiungi credito massivo
         const inputCredito = document.createElement("input");
         inputCredito.type = "number";
         inputCredito.min = "0";
         inputCredito.step = "0.01";
+        inputCredito.placeholder = "€";
 
         const btnAggiungiCredito = document.createElement("button");
         btnAggiungiCredito.textContent = "Aggiungi";
@@ -122,8 +166,12 @@
           const valore = parseFloat(inputCredito.value);
           if (!isNaN(valore) && valore > 0) {
             persona.saldo += valore;
+            aggiungiMovimento(persona, "credito", valore);
+
+            // Golden Bonus: 2 crediti ogni 10 €
             const nuoviBonus = Math.floor(valore / 10) * 2;
             persona.goldenBonus = (persona.goldenBonus || 0) + nuoviBonus;
+
             aggiornaTabella();
             salvaDati();
             inputCredito.value = "";
@@ -134,6 +182,7 @@
         cellCreditoMassivo.appendChild(inputCredito);
         cellCreditoMassivo.appendChild(btnAggiungiCredito);
 
+        // Bottone rimuovi bonus
         const btnRimuoviBonus = document.createElement("button");
         btnRimuoviBonus.textContent = "➖ Bonus";
         btnRimuoviBonus.onclick = () => {
@@ -172,6 +221,7 @@
           nome: nome,
           saldo: 0,
           goldenBonus: 0,
+          storico: [],
         });
         aggiornaTabella();
         salvaDati();
@@ -195,6 +245,53 @@
       const dati = localStorage.getItem("personeCaffe");
       if (dati) {
         persone = JSON.parse(dati);
+      }
+    }
+
+    // Funzione per aggiungere il movimento allo storico
+    function aggiungiMovimento(persona, tipo, valore) {
+      if (!persona.storico) persona.storico = [];
+      persona.storico.push({
+        tipo: tipo,
+        valore: valore,
+        data: new Date().toISOString()
+      });
+    }
+
+    // Funzione per mostrare il popup storico cliccando sul nome utente
+    function mostraStorico(index) {
+      const persona = persone[index];
+      const container = document.getElementById("contenutoStorico");
+      container.innerHTML = "";
+
+      if (!persona.storico || persona.storico.length === 0) {
+        container.textContent = "Nessun movimento registrato.";
+      } else {
+        const ul = document.createElement("ul");
+        persona.storico.slice().reverse().forEach((mov) => {
+          const li = document.createElement("li");
+          const data = new Date(mov.data);
+          const dataStr = data.toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+          li.textContent = `${dataStr}: ${mov.tipo === "credito" ? "Aggiunto credito +€" : "Consumato credito -€"}${mov.valore.toFixed(2)}`;
+          li.style.color = mov.tipo === "credito" ? "#27ae60" : "#c0392b";
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      }
+
+      // Apri modale
+      document.getElementById("modalStorico").style.display = "block";
+    }
+
+    function chiudiModal() {
+      document.getElementById("modalStorico").style.display = "none";
+    }
+
+    // Chiudi modal se clicchi fuori
+    window.onclick = function(event) {
+      const modal = document.getElementById("modalStorico");
+      if (event.target == modal) {
+        modal.style.display = "none";
       }
     }
 
