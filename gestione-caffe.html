@@ -68,6 +68,7 @@
         <th>Aggiungi credito (+0,40€)</th>
         <th>Aggiungi credito massivo</th>
         <th>Golden Bonus</th>
+        <th>Saldo iniziale</th>
       </tr>
     </thead>
     <tbody>
@@ -145,12 +146,16 @@
         cellGoldenBonus.textContent = (persona.goldenBonus || 0);
         cellGoldenBonus.appendChild(btnRimuoviBonus);
 
+        const cellSaldoIniziale = document.createElement("td");
+        cellSaldoIniziale.textContent = persona.saldoIniziale?.toFixed(2) || "0.00";
+
         row.appendChild(cellNome);
         row.appendChild(cellSaldo);
         row.appendChild(creaCellaConElemento(btnDebito));
         row.appendChild(creaCellaConElemento(btnCredito));
         row.appendChild(cellCreditoMassivo);
         row.appendChild(cellGoldenBonus);
+        row.appendChild(cellSaldoIniziale);
 
         tbody.appendChild(row);
       });
@@ -165,7 +170,14 @@
     function aggiungiUtente() {
       const nome = document.getElementById("nomeUtente").value.trim();
       if (nome && !persone.some(p => p.nome.toLowerCase() === nome.toLowerCase())) {
-        persone.push({ nome: nome, saldo: 0, goldenBonus: 0 });
+        const nuovoSaldoIniziale = prompt("Inserisci il saldo iniziale per " + nome + " (default 0):", "0");
+        const saldoIniziale = parseFloat(nuovoSaldoIniziale);
+        persone.push({
+          nome: nome,
+          saldo: !isNaN(saldoIniziale) ? saldoIniziale : 0,
+          goldenBonus: 0,
+          saldoIniziale: !isNaN(saldoIniziale) ? saldoIniziale : 0
+        });
         aggiornaTabella();
         salvaDati();
         document.getElementById("nomeUtente").value = "";
