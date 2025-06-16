@@ -22,6 +22,15 @@
       border: 1px solid #ddd;
       text-align: center;
     }
+    th.credito-consumato {
+      color: #c0392b; /* rosso */
+    }
+    th.aggiungi-credito {
+      color: #27ae60; /* verde */
+    }
+    th.aggiungi-credito-massivo {
+      color: #27ae60; /* verde */
+    }
     button {
       padding: 5px 10px;
       margin: 2px;
@@ -39,12 +48,6 @@
     .header img {
       height: 40px;
     }
-    .bonus-section {
-      background: white;
-      padding: 15px;
-      border: 1px solid #ddd;
-      margin-top: 20px;
-    }
   </style>
 </head>
 <body>
@@ -61,11 +64,11 @@
   <table id="coffeeTable">
     <thead>
       <tr>
-        <th>Nome</th>
-        <th>Saldo (€)</th>
-        <th>Credito consumato (-0,40€)</th>
-        <th>Aggiungi credito (+0,40€)</th>
-        <th>Aggiungi credito massivo</th>
+        <th>👤 Nome</th>
+        <th>Saldo (€) 🪙</th>
+        <th class="credito-consumato">Credito consumato <span style="color:#c0392b;">&#x2193;</span></th>
+        <th class="aggiungi-credito">Aggiungi credito <span style="color:#27ae60;">&#x2191;</span></th>
+        <th class="aggiungi-credito-massivo">Aggiungi credito massivo 💵💳</th>
         <th>Golden Bonus ☕⭐<br /><small>2 free credits for each 10 € payment</small></th>
       </tr>
     </thead>
@@ -83,7 +86,7 @@
       const tbody = document.querySelector("#coffeeTable tbody");
       tbody.innerHTML = "";
 
-      persone.forEach((persona, index) => {
+      persone.forEach((persona) => {
         const row = document.createElement("tr");
 
         const cellNome = document.createElement("td");
@@ -118,7 +121,7 @@
         btnAggiungiCredito.onclick = () => {
           const valore = parseFloat(inputCredito.value);
           if (!isNaN(valore) && valore > 0) {
-            persona.saldo += valore;  // senza arrotondamenti
+            persona.saldo += valore;
             const nuoviBonus = Math.floor(valore / 10) * 2;
             persona.goldenBonus = (persona.goldenBonus || 0) + nuoviBonus;
             aggiornaTabella();
