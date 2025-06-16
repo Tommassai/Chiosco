@@ -201,10 +201,14 @@
 
     function rimuoviUtente() {
       const nome = document.getElementById("nomeUtente").value.trim();
-      persone = persone.filter(p => p.nome.toLowerCase() !== nome.toLowerCase());
-      aggiornaTabella();
-      salvaDati();
-      document.getElementById("nomeUtente").value = "";
+      if (nome && persone.some(p => p.nome.toLowerCase() === nome.toLowerCase())) {
+        if (confirm(`Sei sicuro di voler rimuovere ${nome}?`)) {
+          persone = persone.filter(p => p.nome.toLowerCase() !== nome.toLowerCase());
+          aggiornaTabella();
+          salvaDati();
+          document.getElementById("nomeUtente").value = "";
+        }
+      }
     }
 
     function salvaDati() {
